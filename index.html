@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BacaPDF</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="notification" id="notification"></div>
+
+    <div class="container">
+      <header>
+        <h1><i class="fas fa-book-reader"></i> Baca PDFmu</h1>
+        <p class="tagline"></p>
+      </header>
+
+      <!-- Login Section -->
+      <div id="loginSection">
+        <h2><i class="fas fa-lock"></i> Masuk ke akun anda</h2>
+        <form id="loginForm">
+          <div class="input-group">
+            <i class="fas fa-user"></i>
+            <input type="text" id="username" placeholder="Username" required />
+          </div>
+          <div class="input-group">
+            <i class="fas fa-key"></i>
+            <input
+              type="password"
+              id="password"
+              placeholder="Password"
+              required
+            />
+          </div>
+          <button type="submit">
+            <i class="fas fa-sign-in-alt"></i> Login
+          </button>
+          <p id="loginError" class="error"></p>
+        </form>
+        <p class="form-footer">
+          Belum punya akun?
+          <a href="#" onclick="showRegister()">Daftar di sini</a>
+        </p>
+      </div>
+
+      <!-- Register Section -->
+      <div id="registerSection" class="hidden">
+        <h2><i class="fas fa-user-plus"></i> Daftar Akun Baru</h2>
+        <form id="registerForm">
+          <div class="input-group">
+            <i class="fas fa-user"></i>
+            <input
+              type="text"
+              id="newUsername"
+              placeholder="Username baru"
+              required
+            />
+          </div>
+          <div class="input-group">
+            <i class="fas fa-key"></i>
+            <input
+              type="password"
+              id="newPassword"
+              placeholder="Password baru"
+              required
+            />
+          </div>
+          <div class="input-group">
+            <i class="fas fa-check-circle"></i>
+            <input
+              type="password"
+              id="confirmPassword"
+              placeholder="Konfirmasi password"
+              required
+            />
+          </div>
+          <button type="submit"><i class="fas fa-user-plus"></i> Daftar</button>
+          <p id="registerError" class="error"></p>
+        </form>
+        <p class="form-footer">
+          <a href="#" onclick="showLogin()">Sudah punya akun? Login</a>
+        </p>
+      </div>
+
+      <!-- Reader Section -->
+      <div id="readerSection" class="hidden">
+        <div class="reader-header">
+          <h2 id="userWelcome">Welcome!</h2>
+          <div class="theme-switch-wrapper">
+            <label class="theme-switch" for="themeSwitch">
+              <input
+                type="checkbox"
+                id="themeSwitch"
+                onchange="toggleTheme()"
+              />
+              <div class="slider round"></div>
+            </label>
+            <span class="theme-label"><i class="fas fa-moon"></i></span>
+          </div>
+        </div>
+
+        <!-- File Upload Section -->
+        <div class="upload-section">
+          <label for="pdfFile" class="file-upload-btn">
+            <i class="fas fa-file-pdf"></i> Pilih File PDF
+          </label>
+          <input
+            type="file"
+            id="pdfFile"
+            accept="application/pdf"
+            class="hidden"
+          />
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="loading-spinner hidden">
+          <div class="spinner"></div>
+          <p>Loading...</p>
+        </div>
+
+        <!-- Reader Container -->
+        <div id="readerContainer" class="reader-container">
+          <canvas id="pdfCanvas"></canvas>
+
+          <!-- PDF Controls - Initially Hidden -->
+          <div id="pdfControls" class="pdf-controls hidden">
+            <div class="control-group">
+              <button onclick="prevPage()" title="Previous Page">
+                <i class="fas fa-chevron-left"></i>
+              </button>
+              <div class="page-navigation">
+                <input
+                  type="number"
+                  id="pageNumberInput"
+                  min="1"
+                  placeholder="Page"
+                />
+                <button onclick="goToPage()" title="Go to Page">
+                  <i class="fas fa-arrow-right"></i>
+                </button>
+                <span id="pageInfo">0 / 0</span>
+              </div>
+              <button onclick="nextPage()" title="Next Page">
+                <i class="fas fa-chevron-right"></i>
+              </button>
+            </div>
+
+            <div class="control-group">
+              <button onclick="zoomOut()" title="Zoom Out">
+                <i class="fas fa-search-minus"></i>
+              </button>
+              <button onclick="resetZoom()" title="Reset Zoom">
+                <i class="fas fa-compress-arrows-alt"></i>
+              </button>
+              <button onclick="zoomIn()" title="Zoom In">
+                <i class="fas fa-search-plus"></i>
+              </button>
+            </div>
+
+            <div class="control-group">
+              <button
+                id="bookmarkBtn"
+                onclick="toggleBookmark()"
+                title="Toggle Bookmark"
+              >
+                Add Bookmark
+              </button>
+              <button onclick="toggleBookmarksPanel()" title="Show Bookmarks">
+                <i class="fas fa-bookmark"></i>
+              </button>
+              <button onclick="toggleHistoryPanel()" title="Reading History">
+                <i class="fas fa-history"></i>
+              </button>
+              <button onclick="toggleFullscreen()" title="Fullscreen">
+                <i class="fas fa-expand"></i>
+              </button>
+              <button onclick="printCurrentPage()" title="Print Current Page">
+                <i class="fas fa-print"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bookmarks Panel -->
+        <div id="bookmarksPanel" class="side-panel hidden">
+          <div class="panel-header">
+            <h3><i class="fas fa-bookmark"></i> Your Bookmarks</h3>
+            <button onclick="toggleBookmarksPanel()" class="close-btn">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <ul id="bookmarksList" class="panel-list"></ul>
+        </div>
+
+        <!-- History Panel -->
+        <div id="historyPanel" class="side-panel hidden">
+          <div class="panel-header">
+            <h3><i class="fas fa-history"></i> Reading History</h3>
+            <button onclick="toggleHistoryPanel()" class="close-btn">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <ul id="historyList" class="panel-list"></ul>
+        </div>
+
+        <!-- Logout Button -->
+        <button onclick="logout()" class="logout-btn">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </div>
+    </div>
+
+    <!-- PDF.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <script>
+      // Initialize PDF.js worker
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js";
+    </script>
+    <!-- Application Script -->
+    <script src="app.js"></script>
+  </body>
+</html>
